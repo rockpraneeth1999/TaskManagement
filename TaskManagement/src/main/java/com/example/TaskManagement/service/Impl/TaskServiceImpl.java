@@ -34,7 +34,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponse addTask(TaskRequest taskRequest){
 
         TaskValidator.validateTaskRequest(taskRequest);
-        User user = userValidator.validateUser(taskRequest.getEmail());
+        User user = userValidator.validateUser(taskRequest.getUsername());
 
         Task task = TaskTransformer.TaskRequestToTask(taskRequest);
         task.setUser(user);
@@ -45,11 +45,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponse> getTasks(String email) {
+    public List<TaskResponse> getTasks(String username) {
 
-        User user = userValidator.validateUser(email);
+        User user = userValidator.validateUser(username);
 
-        List<Task> taskList = taskRepository.findAllByUserEmail(email);
+        List<Task> taskList = taskRepository.findAllByUserUsername(username);
         List<TaskResponse> taskResponseList = new ArrayList<>();
         for(Task task : taskList){
             taskResponseList.add(TaskTransformer.TaskToTaskresponse(task));
@@ -73,7 +73,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponse updateTask(TaskRequest taskRequest) {
 
         TaskValidator.validateTaskRequest(taskRequest);
-        User user = userValidator.validateUser(taskRequest.getEmail());
+        User user = userValidator.validateUser(taskRequest.getUsername());
 
         Optional<Task> taskOptional = taskRepository.findById(taskRequest.getId());
         Task existingTask = taskOptional.get();
@@ -89,9 +89,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskResponse deleteTask(String email, int taskId) {
+    public TaskResponse deleteTask(String username, int taskId) {
 
-        User user = userValidator.validateUser(email);
+        User user = userValidator.validateUser(username);
 
         Optional<Task> optionalTask = taskRepository.findById(taskId);
         if(!optionalTask.isPresent()){
@@ -103,16 +103,16 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponse> getTasksBySorting(String field, String email,boolean ascending) {
+    public List<TaskResponse> getTasksBySorting(String field, String username,boolean ascending) {
 
-        User user = userValidator.validateUser(email);
+        User user = userValidator.validateUser(username);
         List<Task> taskList;
 
 
             if(ascending)
-                taskList = taskRepository.findAllByUserEmail(email,Sort.by(Sort.Direction.ASC,field));
+                taskList = taskRepository.findAllByUserUsername(username,Sort.by(Sort.Direction.ASC,field));
             else
-                taskList = taskRepository.findAllByUserEmail(email,Sort.by(Sort.Direction.DESC,field));
+                taskList = taskRepository.findAllByUserUsername(username,Sort.by(Sort.Direction.DESC,field));
 
 
         List<TaskResponse> taskResponseList = new ArrayList<>();
@@ -153,11 +153,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponse> getTasksByPagination(String email, int offset, int pageSize) {
+    public List<TaskResponse> getTasksByPagination(String username, int offset, int pageSize) {
 
-        User user = userValidator.validateUser(email);
+        User user = userValidator.validateUser(username);
 
-        Page<Task> taskPage = taskRepository.findAllByUserEmail(email,PageRequest.of(offset,pageSize));
+        Page<Task> taskPage = taskRepository.findAllByUserUsername(username,PageRequest.of(offset,pageSize));
         List<Task> taskList = taskPage.getContent();
 
         List<TaskResponse> taskResponseList = new ArrayList<>();
@@ -186,15 +186,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponse> getTasksByPaginationAndSorting(String email, int offset, int pageSize, String field, boolean ascending) {
+    public List<TaskResponse> getTasksByPaginationAndSorting(String username, int offset, int pageSize, String field, boolean ascending) {
 
-        User user = userValidator.validateUser(email);
+        User user = userValidator.validateUser(username);
 
         Page<Task> taskPage;
         if(ascending)
-            taskPage = taskRepository.findAllByUserEmail(email,PageRequest.of(offset,pageSize).withSort(Sort.Direction.ASC,field));
+            taskPage = taskRepository.findAllByUserUsername(username,PageRequest.of(offset,pageSize).withSort(Sort.Direction.ASC,field));
         else
-            taskPage = taskRepository.findAllByUserEmail(email,PageRequest.of(offset,pageSize).withSort(Sort.Direction.DESC,field));
+            taskPage = taskRepository.findAllByUserUsername(username,PageRequest.of(offset,pageSize).withSort(Sort.Direction.DESC,field));
 
         List<Task> taskList = taskPage.getContent();
         List<TaskResponse> taskResponseList = new ArrayList<>();
@@ -224,9 +224,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponse> getTasksByDate(String email, String date) {
+    public List<TaskResponse> getTasksByDate(String username, String date) {
 
-        User user = userValidator.validateUser(email);
+        User user = userValidator.validateUser(username);
 
         LocalDate date1;
         try {
@@ -236,7 +236,7 @@ public class TaskServiceImpl implements TaskService {
             throw new TaskException("Invalid Date format");
         }
 
-        List<Task> taskList = taskRepository.findAllByUserEmailAndDueDate(email,date1);
+        List<Task> taskList = taskRepository.findAllByUserUsernameAndDueDate(username,date1);
         List<TaskResponse> taskResponseList = new ArrayList<>();
         for (Task task : taskList){
             taskResponseList.add(TaskTransformer.TaskToTaskresponse(task));
@@ -265,9 +265,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponse> getTasksByStatus(String email, String status) {
+    public List<TaskResponse> getTasksByStatus(String username, String status) {
 
-        User user = userValidator.validateUser(email);
+        User user = userValidator.validateUser(username);
         Status status1;
         try{
             status1 = Status.valueOf(status);
@@ -276,7 +276,7 @@ public class TaskServiceImpl implements TaskService {
             throw new TaskException("Invalid Status");
         }
 
-        List<Task> taskList = taskRepository.findAllByUserEmailAndStatus(email,status1);
+        List<Task> taskList = taskRepository.findAllByUserUsernameAndStatus(username,status1);
         List<TaskResponse> taskResponseList = new ArrayList<>();
         for (Task task : taskList){
             taskResponseList.add(TaskTransformer.TaskToTaskresponse(task));

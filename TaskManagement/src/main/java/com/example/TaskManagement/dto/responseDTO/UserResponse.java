@@ -13,8 +13,6 @@ public class UserResponse {
 
     String name;
 
-    String email;
-
     String username;
 
     String password;

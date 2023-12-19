@@ -7,7 +7,9 @@ import com.example.TaskManagement.model.User;
 import com.example.TaskManagement.repository.UserRepository;
 import com.example.TaskManagement.service.UserService;
 import com.example.TaskManagement.transformer.UserTransformer;
+import com.example.TaskManagement.validator.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,22 +20,32 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    UserValidator userValidator;
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
     @Override
     public UserResponse addUser(UserRequest userRequest) {
-        Optional<User> optionalUser = userRepository.findByEmail(userRequest.getEmail());
+        userValidator.validateUserRequest(userRequest);
+
+        Optional<User> optionalUser = userRepository.findByUsername(userRequest.getUsername());
         if(optionalUser.isPresent()){
-            throw new UserException("User already exists with "+userRequest.getEmail());
+            throw new UserException("User already exists.");
         }
 
         User user = UserTransformer.userRequestToUser(userRequest);
+        String encryptedPassword = passwordEncoder.encode(userRequest.getPassword());
+        user.setPassword(encryptedPassword);
+
         User savedUser = userRepository.save(user);
 
         return UserTransformer.userToUserResponse(savedUser);
     }
 
     @Override
-    public UserResponse deleteUser(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+    public UserResponse deleteUser(String username) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
         if(!optionalUser.isPresent()){
             throw new UserException("User not found");
         }
@@ -46,16 +58,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse updateUser(UserRequest userRequest) {
-        Optional<User> optionalUser = userRepository.findByEmail(userRequest.getEmail());
-        if(optionalUser.isPresent()){
-            User existingUser = optionalUser.get();
-            if(userRequest.getName() != null) existingUser.setName(userRequest.getName());
-            if(userRequest.getEmail() != null) existingUser.setEmail(userRequest.getEmail());
-            if(userRequest.getUsername() != null) existingUser.setUsername(userRequest.getUsername());
-            if(userRequest.getPassword() != null) existingUser.setPassword(userRequest.getPassword());
-            if(userRequest.getRole() != null) existingUser.setRole(userRequest.getRole());
+        userValidator.validateUserRequest(userRequest);
 
-            User updatedUser = userRepository.save(existingUser);
+        Optional<User> optionalUser = userRepository.findByUsername(userRequest.getUsername());
+        if(optionalUser.isPresent()){
+            User user = UserTransformer.userRequestToUser(userRequest);
+            user.setId(optionalUser.get().getId());
+
+            User updatedUser = userRepository.save(user);
 
             return UserTransformer.userToUserResponse(updatedUser);
         }

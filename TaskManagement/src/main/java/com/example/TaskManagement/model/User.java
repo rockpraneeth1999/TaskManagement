@@ -22,10 +22,7 @@ public class User {
     @Column(name = "name",nullable = false)
     String name;
 
-    @Column(name = "email",unique = true,nullable = false)
-    String email;
-
-    @Column(name = "username",nullable = false)
+    @Column(name = "username",unique = true,nullable = false)
     String username;
 
     @Column(name = "password",nullable = false)

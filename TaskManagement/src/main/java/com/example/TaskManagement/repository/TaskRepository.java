@@ -12,11 +12,11 @@ import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task,Integer> {
 
-    public List<Task> findAllByUserEmail(String email);
-    public List<Task> findAllByUserEmail(String email, Sort sort);
-    public Page<Task> findAllByUserEmail(String email, PageRequest pageRequest);
+    public List<Task> findAllByUserUsername(String username);
+    public List<Task> findAllByUserUsername(String email, Sort sort);
+    public Page<Task> findAllByUserUsername(String email, PageRequest pageRequest);
     List<Task> findAllByDueDate(LocalDate date);
-    List<Task> findAllByUserEmailAndDueDate(String userEmail,LocalDate dueDate);
+    List<Task> findAllByUserUsernameAndDueDate(String userEmail,LocalDate dueDate);
     List<Task> findAllByStatus(Status status);
-    List<Task> findAllByUserEmailAndStatus(String email,Status status);;
+    List<Task> findAllByUserUsernameAndStatus(String email,Status status);;
 }

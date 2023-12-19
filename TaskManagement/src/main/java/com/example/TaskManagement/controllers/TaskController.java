@@ -6,6 +6,7 @@ import com.example.TaskManagement.service.Impl.TaskServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 public class TaskController {
     @Autowired
     TaskServiceImpl taskServiceImpl;
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PostMapping("/add")
     public ResponseEntity addTask(@RequestBody TaskRequest taskRequest){
         try{
@@ -25,6 +27,7 @@ public class TaskController {
             return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @GetMapping("/get-tasks/{email}")
     public ResponseEntity getTasks(@PathVariable("email") String email){
         try {
@@ -35,7 +38,7 @@ public class TaskController {
             return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-all-tasks")
     public ResponseEntity getAllTasks(){
         try {
@@ -46,7 +49,7 @@ public class TaskController {
             return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
-
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PutMapping("/update")
     public ResponseEntity updateTask(@RequestBody TaskRequest taskRequest){
         try {
@@ -58,10 +61,11 @@ public class TaskController {
         }
     }
 
-    @DeleteMapping("/delete/{email}/{id}")
-    public ResponseEntity deleteTask(@PathVariable("email") String email,@PathVariable("id") int taskId){
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @DeleteMapping("/delete/{username}/{id}")
+    public ResponseEntity deleteTask(@PathVariable("username") String username,@PathVariable("id") int taskId){
         try {
-            TaskResponse taskResponse = taskServiceImpl.deleteTask(email,taskId);
+            TaskResponse taskResponse = taskServiceImpl.deleteTask(username,taskId);
             return new ResponseEntity(taskResponse,HttpStatus.ACCEPTED);
         }
         catch (Exception exception){
@@ -69,16 +73,19 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/sort/{field}/{email}/{ascending}")
-    public ResponseEntity sortTasks(@PathVariable("field") String field,@PathVariable("email") String email,@PathVariable("ascending") boolean ascending){
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @GetMapping("/sort/{field}/{username}/{ascending}")
+    public ResponseEntity sortTasks(@PathVariable("field") String field,@PathVariable("username") String username,@PathVariable("ascending") boolean ascending){
         try {
-            List<TaskResponse> taskResponseList = taskServiceImpl.getTasksBySorting(field,email,ascending);
+            List<TaskResponse> taskResponseList = taskServiceImpl.getTasksBySorting(field,username,ascending);
             return new ResponseEntity(taskResponseList,HttpStatus.FOUND);
         }
         catch (Exception exception){
             return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/sort/{field}/{ascending}")
     public ResponseEntity sortTasks(@PathVariable("field") String field,@PathVariable("ascending") boolean ascending){
         try {
@@ -90,6 +97,7 @@ public class TaskController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/pagination/{offset}/{pageSize}")
     public ResponseEntity getTasksByPagination(@PathVariable("offset") int offset,@PathVariable("pageSize") int pageSize){
         try {
@@ -100,17 +108,19 @@ public class TaskController {
             return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
-
-    @GetMapping("/pagination/{email}/{offset}/{pageSize}")
-    public ResponseEntity getTasksByPagination(@PathVariable("email") String email,@PathVariable("offset") int offset,@PathVariable("pageSize") int pageSize){
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @GetMapping("/pagination/{username}/{offset}/{pageSize}")
+    public ResponseEntity getTasksByPagination(@PathVariable("username") String username,@PathVariable("offset") int offset,@PathVariable("pageSize") int pageSize){
         try {
-            List<TaskResponse> taskResponseList = taskServiceImpl.getTasksByPagination(email,offset,pageSize);
+            List<TaskResponse> taskResponseList = taskServiceImpl.getTasksByPagination(username,offset,pageSize);
             return new ResponseEntity(taskResponseList,HttpStatus.FOUND);
         }
         catch (Exception exception){
             return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/pagination-sorting/{offset}/{field}/{pageSize}/{ascending}")
     public ResponseEntity getTasksByPaginationAndSorting(@PathVariable("offset") int offset,@PathVariable("pageSize") int pageSize,@PathVariable("field") String field,@PathVariable("ascending") boolean ascending){
         try {
@@ -122,16 +132,19 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/pagination-sorting/{email}/{offset}/{field}/{pageSize}/{ascending}")
-    public ResponseEntity getTasksByPaginationAndSorting(@PathVariable("email") String email,@PathVariable("offset") int offset,@PathVariable("pageSize") int pageSize,@PathVariable("field") String field,@PathVariable("ascending") boolean ascending){
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @GetMapping("/pagination-sorting/{username}/{offset}/{field}/{pageSize}/{ascending}")
+    public ResponseEntity getTasksByPaginationAndSorting(@PathVariable("username") String username,@PathVariable("offset") int offset,@PathVariable("pageSize") int pageSize,@PathVariable("field") String field,@PathVariable("ascending") boolean ascending){
         try {
-            List<TaskResponse> taskResponseList = taskServiceImpl.getTasksByPaginationAndSorting(email,offset,pageSize,field,ascending);
+            List<TaskResponse> taskResponseList = taskServiceImpl.getTasksByPaginationAndSorting(username,offset,pageSize,field,ascending);
             return new ResponseEntity(taskResponseList,HttpStatus.FOUND);
         }
         catch (Exception exception){
             return new ResponseEntity(exception.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/task-by-date/{date}")
     public ResponseEntity getTasksByDate(@PathVariable("date") String date){
         try {
@@ -143,10 +156,11 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/task-by-date/{email}/{date}")
-    public ResponseEntity getTasksByDate(@PathVariable("email") String email,@PathVariable("date") String date){
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @GetMapping("/task-by-date/{username}/{date}")
+    public ResponseEntity getTasksByDate(@PathVariable("username") String username,@PathVariable("date") String date){
         try {
-            List<TaskResponse> taskResponseList = taskServiceImpl.getTasksByDate(email,date);
+            List<TaskResponse> taskResponseList = taskServiceImpl.getTasksByDate(username,date);
             return new ResponseEntity(taskResponseList,HttpStatus.FOUND);
         }
         catch (Exception exception){
@@ -154,6 +168,7 @@ public class TaskController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/task-by-status/{status}")
     public ResponseEntity getTasksByStatus(@PathVariable("status") String status){
         try {
@@ -165,10 +180,11 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/task-by-status/{email}/{status}")
-    public ResponseEntity getTasksByStatus(@PathVariable("email") String email,@PathVariable("status") String status){
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @GetMapping("/task-by-status/{username}/{status}")
+    public ResponseEntity getTasksByStatus(@PathVariable("username") String username,@PathVariable("status") String status){
         try {
-            List<TaskResponse> taskResponseList = taskServiceImpl.getTasksByStatus(email,status);
+            List<TaskResponse> taskResponseList = taskServiceImpl.getTasksByStatus(username,status);
             return new ResponseEntity(taskResponseList,HttpStatus.FOUND);
         }
         catch (Exception exception){

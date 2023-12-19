@@ -21,5 +21,5 @@ public class TaskRequest {
 
     String status;
 
-    String email;
+    String username;
 }
